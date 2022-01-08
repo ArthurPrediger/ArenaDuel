@@ -1,4 +1,4 @@
-#include "Duelist.h"
+#include "Duel.h"
 
 int main()
 {
@@ -8,18 +8,17 @@ int main()
 		<< std::endl;
 
 	int input = 0;
-	//std::cin >> input;
+	std::cin >> input;
 
-	CpuDuelist d = {};
-	std::cout << "\n\n" << d.GetStrength();
-	std::cout << "\n" << d.GetAgility();
-	std::cout << "\n" << d.GetEndurance();
-	std::cout << "\n" << d.GetLife();
-	std::cout << "\n" << d.GetEnergy();
+	std::vector<Duelist> cpuD = { CpuDuelist(), CpuDuelist() };
+	std::vector<Duelist> userD = { UserDuelist("Dick-butt", 5, 3, 2), UserDuelist("Poo", 4, 2, 4) };
+
+	Duel d = { userD, cpuD };
 
 	if (input == 1)
 	{
-		return 69;
+		system("CLS");
+		d.PlayMatch();
 	}
 
 	return 0;

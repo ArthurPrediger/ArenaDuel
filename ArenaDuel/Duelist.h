@@ -12,72 +12,106 @@ int RollDice()
 class Duelist
 {
 public:
-	Duelist(const std::string name, float strength, float agility, float endurance)
+	Duelist(const std::string name, int strength, int agility, int endurance)
 		:
 		name(name),
 		strength(strength),
 		agility(agility),
-		endurance(endurance)
-	{
-		energy = endurance * agility + strength;
-		life = endurance * strength + agility;
-	};
+		endurance(endurance),
+		energy(6 * (endurance * agility + strength)),
+		life(6 * (endurance * strength + agility))
+	{};
+	virtual ~Duelist() = default;
 	const std::string GetName() const
 	{
 		return name;
 	}
-	float GetLife() const
+	int GetLife() const
 	{
 		return life;
 	}
-	void SetLife(float difference)
-	{
-		life += difference;
-	}
-	float GetEnergy() const
+	int GetEnergy() const
 	{
 		return energy;
 	}
-	void SetEnergy(float difference)
-	{
-		energy += difference;
-	}
-	float GetStrength() const
+	int GetStrength() const
 	{
 		return strength;
 	}
-	float GetAgility() const
+	int GetAgility() const
 	{
 		return agility;
 	}
-	float GetEndurance() const
+	int GetEndurance() const
 	{
 		return endurance;
 	}
-	void Attack(Duelist& enemy)
+	void Attack(Duelist& foe)
 	{
-		const float damage = strength * (float)RollDice();
-		energy -= std::max(1.0f, (damage - agility * endurance));
-		if (energy >= 0.0f)
+		if (IsAlive() && foe.IsAlive())
 		{
-			enemy.SetLife(damage);
-		}
-		else
-		{
-			Recover();
+			const int damage = strength * RollDice();
+			SetEnergy(-std::max(1, (damage - agility * endurance)));
+			if (energy >= 0)
+			{
+				foe.SetLife(-damage);
+				std::cout << GetName() << " attacks " << foe.GetName() << " applying " << damage << " of damage." << std::endl;
+				if (!foe.IsAlive())
+				{
+					std::cout << foe.GetName() << " is dead!" << std::endl;
+				}
+			}
+			else
+			{
+				std::cout << GetName() << " has no energy to attack!" << std::endl;
+			}
 		}
 	}
 	void Recover()
 	{
-		energy += std::max(agility * RollDice(), 6.0f);
+		if (IsAlive())
+		{
+			const int r = agility * RollDice();
+			energy += r;
+			std::cout << GetName() << " recovered " << r << " of energy\n";
+		}
 	};
+	int GetInitiative() const
+	{
+		return GetAgility() * RollDice();
+	}
+	bool IsAlive() const
+	{
+		return GetLife() > 0;
+	}
+protected:
+	void SetLife(int difference)
+	{
+		life += difference;
+	}
+	void SetEnergy(int difference)
+	{
+		energy += difference;
+	}
+	void SetStrength(int strength_in)
+	{
+		strength = strength_in;
+	}
+	void SetAgility(int agility_in)
+	{
+		agility = agility_in;
+	}
+	void SetEndurance(int endurance_in)
+	{
+		endurance = endurance_in;
+	}
 private:
 	std::string name;
-	float strength;
-	float agility;
-	float endurance;
-	float energy;
-	float life;
+	int strength;
+	int agility;
+	int endurance;
+	int energy;
+	int life;
 };
 
 class CpuDuelist : public Duelist
@@ -85,23 +119,38 @@ class CpuDuelist : public Duelist
 public:
 	CpuDuelist(std::string name = "Cpu Powerslave")
 		:
-		Duelist(name, GenerateStren(), GenerateAgili(), GenerateEndur())
-	{}
+		Duelist(name, 0, 0, 0)
+	{
+		SetStrength(GenerateStren());
+		SetAgility(GenerateAgili());
+		SetEndurance(GenerateEndur());
+		SetEnergy(6 * (GetEndurance() * GetAgility() + GetStrength()));
+		SetLife(6 * (GetEndurance() * GetStrength() + GetAgility()));
+	}
 private:
-	float GenerateStren() const
+	int GenerateStren()
 	{
 		std::mt19937 rng(std::random_device{}());
-		std::uniform_real_distribution<float> stren(1.0f, 8.0f);
+		std::uniform_int_distribution<int> stren(1, 8);
 		return stren(rng);
 	}
-	float GenerateAgili() const
+	int GenerateAgili()
 	{
 		std::mt19937 rng(std::random_device{}());
-		std::uniform_real_distribution<float> agili(1.0f, 9.0f - GetStrength());
+		std::uniform_int_distribution<int> agili(1, 9 - GetStrength());
 		return agili(rng);
 	}
-	float GenerateEndur() const
+	int GenerateEndur()
 	{
-		return 10.0f - (GetStrength() + GetAgility());
+		return 10 - (GetStrength() + GetAgility());
 	}
+};
+
+class UserDuelist : public Duelist
+{
+public:
+	UserDuelist(const std::string name, int strength, int agility, int endurance)
+		:
+		Duelist(name, strength, agility, endurance)
+	{}
 };
