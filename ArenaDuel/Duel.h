@@ -1,45 +1,45 @@
 #pragma once
 
 #include <vector>
-#include "Duelist.h"
+#include "Duellist.h"
 #include <algorithm>
 
 class Duel
 {
 public:
-	Duel(std::vector<Duelist> userDuelists, std::vector<Duelist> cpuDuelists)
+	Duel(std::vector<Duellist> userDuellists, std::vector<Duellist> cpuDuellists)
 		:
-		userDuelists(std::move(userDuelists)),
-		cpuDuelists(std::move(cpuDuelists))
+		userDuellists(std::move(userDuellists)),
+		cpuDuellists(std::move(cpuDuellists))
 	{};
 	void PlayMatch()
 	{
-		const auto alive_pred = [](const Duelist& d) {return d.IsAlive(); };
-		while (std::any_of(userDuelists.begin(), userDuelists.end(), alive_pred) && 
-			std::any_of(cpuDuelists.begin(), cpuDuelists.end(), alive_pred))
+		const auto alive_pred = [](const Duellist& d) {return d.IsAlive(); };
+		while (std::any_of(userDuellists.begin(), userDuellists.end(), alive_pred) && 
+			std::any_of(cpuDuellists.begin(), cpuDuellists.end(), alive_pred))
 		{
 			std::mt19937 rng(std::random_device{}());
-			std::shuffle(userDuelists.begin(), userDuelists.end(), rng);
-			std::partition(userDuelists.begin(), userDuelists.end(), alive_pred);
-			std::shuffle(cpuDuelists.begin(), cpuDuelists.end(), rng);
-			std::partition(cpuDuelists.begin(), cpuDuelists.end(), alive_pred);
+			std::shuffle(userDuellists.begin(), userDuellists.end(), rng);
+			std::partition(userDuellists.begin(), userDuellists.end(), alive_pred);
+			std::shuffle(cpuDuellists.begin(), cpuDuellists.end(), rng);
+			std::partition(cpuDuellists.begin(), cpuDuellists.end(), alive_pred);
 
-			for (size_t i = 0; i < std::min(userDuelists.size(), cpuDuelists.size()); i++)
+			for (size_t i = 0; i < std::min(userDuellists.size(), cpuDuellists.size()); i++)
 			{
-				Engage(userDuelists[i], cpuDuelists[i]);
+				Engage(userDuellists[i], cpuDuellists[i]);
 			}
 			std::cout << std::endl;
 
-			for (size_t i = 0; i < std::max(userDuelists.size(), cpuDuelists.size()); i++)
+			for (size_t i = 0; i < std::max(userDuellists.size(), cpuDuellists.size()); i++)
 			{
-				userDuelists[i].Recover();
-				cpuDuelists[i].Recover();
+				userDuellists[i].Recover();
+				cpuDuellists[i].Recover();
 			}
 
 			std::cout << "\n=================================================\n";
 		}
 
-		if (std::any_of(userDuelists.begin(), userDuelists.end(), alive_pred))
+		if (std::any_of(userDuellists.begin(), userDuellists.end(), alive_pred))
 		{
 			std::cout << "You win!" << std::endl;
 		}
@@ -48,7 +48,7 @@ public:
 			std::cout << "Of course you had lost! What controls this, retarded?" << std::endl;
 		}
 	}
-	void Engage(Duelist& d1, Duelist& d2)
+	void Engage(Duellist& d1, Duellist& d2)
 	{
 		auto* pd1 = &d1;
 		auto* pd2 = &d2;
@@ -62,7 +62,7 @@ public:
 		pd2->Attack(*pd1);
 	}
 private:
-	std::vector<Duelist> userDuelists;
-	std::vector<Duelist> cpuDuelists;
+	std::vector<Duellist> userDuellists;
+	std::vector<Duellist> cpuDuellists;
 	int nRounds = 0;
 };

@@ -10,8 +10,8 @@ int main()
 	int input = 0;
 	std::cin >> input;
 
-	std::vector<Duelist> cpuD = { CpuDuelist(), CpuDuelist() };
-	std::vector<Duelist> userD = { UserDuelist("Dick-butt", 5, 3, 2), UserDuelist("Poo", 4, 2, 4) };
+	std::vector<Duellist> cpuD = { CpuDuellist(), CpuDuellist() };
+	std::vector<Duellist> userD = { UserDuellist("Dick-butt", 5, 3, 2), UserDuellist("Poo", 4, 2, 4) };
 
 	Duel d = { userD, cpuD };
 

@@ -9,10 +9,10 @@ int RollDice()
 	return dice(rng);
 }
 
-class Duelist
+class Duellist
 {
 public:
-	Duelist(const std::string name, int strength, int agility, int endurance)
+	Duellist(const std::string name, int strength, int agility, int endurance)
 		:
 		name(name),
 		strength(strength),
@@ -21,7 +21,7 @@ public:
 		energy(6 * (endurance * agility + strength)),
 		life(6 * (endurance * strength + agility))
 	{};
-	virtual ~Duelist() = default;
+	virtual ~Duellist() = default;
 	const std::string GetName() const
 	{
 		return name;
@@ -46,7 +46,7 @@ public:
 	{
 		return endurance;
 	}
-	void Attack(Duelist& foe)
+	void Attack(Duellist& foe)
 	{
 		if (IsAlive() && foe.IsAlive())
 		{
@@ -114,12 +114,12 @@ private:
 	int life;
 };
 
-class CpuDuelist : public Duelist
+class CpuDuellist : public Duellist
 {
 public:
-	CpuDuelist(std::string name = "Cpu Powerslave")
+	CpuDuellist(std::string name = "Cpu Powerslave")
 		:
-		Duelist(name, 0, 0, 0)
+		Duellist(name, 0, 0, 0)
 	{
 		SetStrength(GenerateStren());
 		SetAgility(GenerateAgili());
@@ -146,11 +146,11 @@ private:
 	}
 };
 
-class UserDuelist : public Duelist
+class UserDuellist : public Duellist
 {
 public:
-	UserDuelist(const std::string name, int strength, int agility, int endurance)
+	UserDuellist(const std::string name, int strength, int agility, int endurance)
 		:
-		Duelist(name, strength, agility, endurance)
+		Duellist(name, strength, agility, endurance)
 	{}
 };
