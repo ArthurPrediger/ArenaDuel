@@ -12,7 +12,7 @@ int RollDice()
 class Duellist
 {
 public:
-	Duellist(const std::string name, int strength, int agility, int endurance)
+	Duellist(std::string name, int strength, int agility, int endurance)
 		:
 		name(name),
 		strength(strength),
@@ -21,8 +21,12 @@ public:
 		energy(6 * (endurance * agility + strength)),
 		life(6 * (endurance * strength + agility))
 	{};
+	Duellist(std::string name)
+		:
+		name(name)
+	{};
 	virtual ~Duellist() = default;
-	const std::string GetName() const
+	const std::string& GetName() const
 	{
 		return name;
 	}
@@ -105,13 +109,15 @@ protected:
 	{
 		endurance = endurance_in;
 	}
+	static constexpr int ptsToDist = 10;
+	static constexpr int maxPtsPerAttr = 8;
 private:
 	std::string name;
-	int strength;
-	int agility;
-	int endurance;
-	int energy;
-	int life;
+	int strength = 1;
+	int agility = 1;
+	int endurance = 1;
+	int energy = 1;
+	int life = 1;
 };
 
 class CpuDuellist : public Duellist
@@ -119,30 +125,21 @@ class CpuDuellist : public Duellist
 public:
 	CpuDuellist(std::string name = "Cpu Powerslave")
 		:
-		Duellist(name, 0, 0, 0)
+		Duellist(name)
 	{
-		SetStrength(GenerateStren());
-		SetAgility(GenerateAgili());
-		SetEndurance(GenerateEndur());
+		GenerateAttributes();
 		SetEnergy(6 * (GetEndurance() * GetAgility() + GetStrength()));
 		SetLife(6 * (GetEndurance() * GetStrength() + GetAgility()));
 	}
 private:
-	int GenerateStren()
+	void GenerateAttributes()
 	{
 		std::mt19937 rng(std::random_device{}());
-		std::uniform_int_distribution<int> stren(1, 8);
-		return stren(rng);
-	}
-	int GenerateAgili()
-	{
-		std::mt19937 rng(std::random_device{}());
-		std::uniform_int_distribution<int> agili(1, 9 - GetStrength());
-		return agili(rng);
-	}
-	int GenerateEndur()
-	{
-		return 10 - (GetStrength() + GetAgility());
+		std::uniform_int_distribution<int> stren(1, std::min(maxPtsPerAttr, ptsToDist - (GetAgility() + GetEndurance())));
+		SetStrength(stren(rng));
+		std::uniform_int_distribution<int> agili(1, std::min(maxPtsPerAttr, ptsToDist - (GetStrength() + GetEndurance())));
+		SetAgility(agili(rng));
+		SetEndurance(ptsToDist - (GetStrength() + GetAgility()));
 	}
 };
 
