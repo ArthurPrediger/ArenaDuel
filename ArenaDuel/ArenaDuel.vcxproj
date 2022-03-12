@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="Duel.h" />
     <ClInclude Include="Duelist.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />

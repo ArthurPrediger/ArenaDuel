@@ -1,6 +1,9 @@
 #pragma once
 #include <iostream>
 #include <random>
+#include <memory>
+#include <algorithm>
+#include "Weapon.h"
 
 int RollDice()
 {
@@ -12,20 +15,23 @@ int RollDice()
 class Duellist
 {
 public:
-	Duellist(std::string name, int strength, int agility, int endurance)
+	Duellist(std::string name, int strength, int agility, int endurance, std::unique_ptr<Weapon> pW)
 		:
 		name(name),
 		strength(strength),
 		agility(agility),
 		endurance(endurance),
 		energy(6 * (endurance * agility + strength)),
-		life(6 * (endurance * strength + agility))
+		life(6 * (endurance * strength + agility)),
+		pWeapon(std::move(pW))
 	{};
-	Duellist(std::string name)
+	Duellist(std::string name, std::unique_ptr<Weapon> pW)
 		:
-		name(name)
+		name(name),
+		pWeapon(std::move(pW))
 	{};
-	virtual ~Duellist() = default;
+	Duellist(Duellist&&) = default;
+	Duellist& operator=(Duellist&&) = default;
 	const std::string& GetName() const
 	{
 		return name;
@@ -54,15 +60,17 @@ public:
 	{
 		if (IsAlive() && foe.IsAlive())
 		{
-			const int damage = strength * RollDice();
-			SetEnergy(-std::max(1, (damage - agility * endurance)));
+			const int damage = pWeapon->Damage(GetStrength(), GetAgility()) * RollDice();
+			SetEnergy(-std::max(1, (damage / endurance)));
 			if (energy >= 0)
 			{
 				foe.SetLife(-damage);
-				std::cout << GetName() << " attacks " << foe.GetName() << " applying " << damage << " of damage." << std::endl;
+				std::cout << GetName() << " attacks " << foe.GetName() <<  " with his/her " << pWeapon->GetName() 
+					<< " applying " << damage << " of damage." << std::endl;
 				if (!foe.IsAlive())
 				{
 					std::cout << foe.GetName() << " is dead!" << std::endl;
+					PilferpWeapon(foe);
 				}
 			}
 			else
@@ -88,6 +96,17 @@ public:
 	{
 		return GetLife() > 0;
 	}
+	bool HasWeapon() const
+	{
+		return pWeapon->GetRank() != 0;
+	}
+	void PilferpWeapon(Duellist& foe)
+	{
+		if (foe.pWeapon->GetRank() > pWeapon->GetRank())
+		{
+			pWeapon = std::move(foe.pWeapon);
+		}
+	}
 protected:
 	void SetLife(int difference)
 	{
@@ -110,7 +129,7 @@ protected:
 		endurance = endurance_in;
 	}
 	static constexpr int ptsToDist = 10;
-	static constexpr int maxPtsPerAttr = 8;
+	static constexpr int maxPtsPerAttr = 6;
 private:
 	std::string name;
 	int strength = 1;
@@ -118,14 +137,15 @@ private:
 	int endurance = 1;
 	int energy = 1;
 	int life = 1;
+	std::unique_ptr<Weapon> pWeapon;
 };
 
 class CpuDuellist : public Duellist
 {
 public:
-	CpuDuellist(std::string name = "Cpu Powerslave")
+	CpuDuellist(std::unique_ptr<Weapon> pW, std::string name = "Cpu Powerslave")
 		:
-		Duellist(name)
+		Duellist(name, std::move(pW))
 	{
 		GenerateAttributes();
 		SetEnergy(6 * (GetEndurance() * GetAgility() + GetStrength()));
@@ -146,8 +166,8 @@ private:
 class UserDuellist : public Duellist
 {
 public:
-	UserDuellist(const std::string name, int strength, int agility, int endurance)
+	UserDuellist(const std::string name, int strength, int agility, int endurance, std::unique_ptr<Weapon> pW)
 		:
-		Duellist(name, strength, agility, endurance)
+		Duellist(name, strength, agility, endurance, std::move(pW))
 	{}
 };

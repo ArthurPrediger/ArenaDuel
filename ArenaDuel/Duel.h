@@ -5,15 +5,11 @@
 class Duel
 {
 public:
-	Duel(std::vector<Duellist> userDuellists, std::vector<Duellist> cpuDuellists)
-		:
-		userDuellists(std::move(userDuellists)),
-		cpuDuellists(std::move(cpuDuellists))
-	{};
+	Duel() = default;
 	void PlayMatch()
 	{
-		const auto alive_pred = [](const Duellist& d) {return d.IsAlive(); };
-		while (std::any_of(userDuellists.begin(), userDuellists.end(), alive_pred) && 
+		const auto alive_pred = [](const std::unique_ptr<Duellist>& d) {return d->IsAlive(); };
+		while (std::any_of(userDuellists.begin(), userDuellists.end(), alive_pred) &&
 			std::any_of(cpuDuellists.begin(), cpuDuellists.end(), alive_pred))
 		{
 			std::mt19937 rng(std::random_device{}());
@@ -24,14 +20,14 @@ public:
 
 			for (size_t i = 0; i < std::min(userDuellists.size(), cpuDuellists.size()); i++)
 			{
-				Engage(userDuellists[i], cpuDuellists[i]);
+				Engage(*userDuellists[i], *cpuDuellists[i]);
 			}
 			std::cout << std::endl;
 
 			for (size_t i = 0; i < std::max(userDuellists.size(), cpuDuellists.size()); i++)
 			{
-				userDuellists[i].Recover();
-				cpuDuellists[i].Recover();
+				userDuellists[i]->Recover();
+				cpuDuellists[i]->Recover();
 			}
 
 			std::cout << "\n=================================================\n";
@@ -59,8 +55,8 @@ public:
 		pd1->Attack(*pd2);
 		pd2->Attack(*pd1);
 	}
-private:
-	std::vector<Duellist> userDuellists;
-	std::vector<Duellist> cpuDuellists;
+public:
+	std::vector<std::unique_ptr<Duellist>> userDuellists;
+	std::vector<std::unique_ptr<Duellist>> cpuDuellists;
 	int nRounds = 0;
 };
